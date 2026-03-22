@@ -1,0 +1,121 @@
+DROP TABLE IF EXISTS ENROLLMENT CASCADE;
+DROP TABLE IF EXISTS COURSEASSIGNMENT CASCADE;
+DROP TABLE IF EXISTS ATTENDANCE CASCADE;
+DROP TABLE IF EXISTS RESOURCES CASCADE;
+DROP TABLE IF EXISTS ASSIGNMENT CASCADE;
+DROP TABLE IF EXISTS SUBMISSION CASCADE;
+DROP TABLE IF EXISTS FEES CASCADE;
+DROP TABLE IF EXISTS STUDENT CASCADE;
+DROP TABLE IF EXISTS PROFESSOR CASCADE;
+DROP TABLE IF EXISTS COURSE CASCADE;
+DROP TABLE IF EXISTS ADMIN CASCADE;
+
+CREATE TABLE STUDENT(
+    StudentID SERIAL PRIMARY KEY,
+    firstName varchar(100) NOT NULL,
+    lastName varchar(100) NOT NULL,
+    Information varchar(255),
+    Class varchar(50) NOT NULL,
+    RollNo int NOT NULL,
+    Department varchar(50) NOT NULL,
+    emailID varchar(255) NOT NULL,
+    Password varchar(255) NOT NULL
+);
+
+CREATE TABLE PROFESSOR(
+    ProfessorID SERIAL PRIMARY KEY,
+    firstName varchar(100) NOT NULL,
+    lastName varchar(100) NOT NULL,
+    Information varchar(255),
+    Department varchar(50),
+    emailID varchar(255) NOT NULL,
+    Password varchar(255) NOT NULL
+);
+
+CREATE TABLE COURSE(
+    CourseID SERIAL PRIMARY KEY,
+    CourseName varchar(100) NOT NULL,
+    Seats int NOT NULL,
+    Department varchar(100) NOT NULL,
+    LessonPlan varchar(255)
+);
+
+CREATE TABLE ENROLLMENT(
+    StudentID int NOT NULL,
+    CourseID int NOT NULL,
+    Grades int,
+    PRIMARY KEY (StudentID,CourseID),
+    FOREIGN KEY (StudentID) REFERENCES STUDENT(StudentID) ON DELETE CASCADE,
+    FOREIGN KEY (CourseID) REFERENCES COURSE(CourseID) ON DELETE CASCADE
+);
+
+CREATE TABLE COURSEASSIGNMENT(
+    CourseID int NOT NULL,
+    ProfessorID int NOT NULL,
+    PRIMARY KEY (CourseID,ProfessorID),
+    FOREIGN KEY (CourseID) REFERENCES COURSE(CourseID) ON DELETE CASCADE,
+    FOREIGN KEY (ProfessorID) REFERENCES PROFESSOR(ProfessorID) ON DELETE CASCADE
+);
+
+CREATE TABLE ADMIN(
+    AdminID SERIAL PRIMARY KEY,
+    firstName varchar(100) NOT NULL,
+    lastName varchar(100) NOT NULL,
+    Password varchar(100) NOT NULL,
+    emailID varchar(255) NOT NULL
+);
+
+CREATE TABLE ATTENDANCE(
+    AttendanceID SERIAL PRIMARY KEY,
+    StudentID int NOT NULL,
+    CourseID int NOT NULL,
+    AttendanceDate DATE NOT NULL,
+    AttendanceTime TIME,
+    AttendanceStatus varchar(100) NOT NULL,
+    FOREIGN KEY (StudentID) REFERENCES STUDENT(StudentID) ON DELETE CASCADE,
+    FOREIGN KEY (CourseID) REFERENCES COURSE(CourseID) ON DELETE CASCADE
+);
+
+CREATE TABLE RESOURCES(
+    ResourceID SERIAL PRIMARY KEY,
+    CourseID int NOT NULL,
+    ProfessorID int NOT NULL,
+    UploadedAt DATE,
+    Title varchar(100) NOT NULL,
+    FileURL varchar(255) NOT NULL,
+    FOREIGN KEY (CourseID) REFERENCES COURSE(CourseID) ON DELETE CASCADE,
+    FOREIGN KEY (ProfessorID) REFERENCES PROFESSOR(ProfessorID) ON DELETE CASCADE
+);
+
+CREATE TABLE ASSIGNMENT(
+    AssignmentID SERIAL PRIMARY KEY,
+    CourseID int NOT NULL,
+    ProfessorID int NOT NULL,
+    Title varchar(100) NOT NULL,
+    AssignmentDescription varchar(255),
+    Duedate DATE NOT NULL,
+    UploadedAt DATE,
+    FOREIGN KEY (CourseID) REFERENCES COURSE(CourseID) ON DELETE CASCADE,
+    FOREIGN KEY (ProfessorID) REFERENCES PROFESSOR(ProfessorID) ON DELETE CASCADE
+);
+
+CREATE TABLE SUBMISSION(
+    SubmissionID SERIAL PRIMARY KEY,
+    AssignmentID int NOT NULL,
+    StudentID int NOT NULL,
+    UploadedAt DATE NOT NULL,
+    FileURL varchar(255) NOT NULL,
+    FOREIGN KEY (AssignmentID) REFERENCES ASSIGNMENT(AssignmentID) ON DELETE CASCADE,
+    FOREIGN KEY (StudentID) REFERENCES STUDENT(StudentID) ON DELETE CASCADE
+);
+
+CREATE TABLE FEES(
+    FeeId SERIAL PRIMARY KEY,
+    StudentID int NOT NULL,
+    AmountPaid int NOT NULL,
+    AmountDue int NOT NULL,
+    Semester varchar(100) NOT NULL,
+    PaymentTime TIME NOT NULL,
+    FeeStatus varchar(100) NOT NULL,
+    FOREIGN KEY (StudentID) REFERENCES STUDENT(StudentID) ON DELETE CASCADE
+);
