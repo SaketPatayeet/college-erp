@@ -60,4 +60,45 @@ const markAttendance = async (req,res)=>{
     }
 }
 
-module.exports = {getMyCourses,markAttendance};
+const getAllAttendance = async (req,res)=>{
+    const ProfessorID = req.user.id;
+    const CourseID = req.params.CourseID;
+
+    const checkAssignment = await pool.query('SELECT * FROM COURSEASSIGNMENT WHERE ProfessorID = $1 AND CourseID = $2',
+        [ProfessorID,CourseID]);
+    
+    if(checkAssignment.rowCount == 0){
+        return res.status(404).json({message:"Incorrect Professor ID!"});
+    }
+
+    const getAttendance = await pool.query(`SELECT s.studentid,s.firstname, s.lastname, COUNT(*) as total_classes, SUM(CASE WHEN a.attendancestatus = 'present' THEN 1 ELSE 0 END) as present_count, ROUND(SUM(CASE WHEN a.attendancestatus = 'present' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as percentage FROM STUDENT AS s INNER JOIN ATTENDANCE AS a ON s.studentid = a.studentid WHERE a.CourseID = $1 GROUP BY s.studentid, s.firstname, s.lastname`,
+        [CourseID]
+    );
+    
+    return res.status(200).json({message:getAttendance.rows});
+}
+
+const updateAttendance = async (req,res)=>{
+    const AttendanceID = req.params.id;
+    const {StudentID,CourseID,AttendanceStatus} = req.body;
+
+    const checkAttendance = await pool.query('SELECT * FROM ATTENDANCE WHERE AttendanceID = $1 AND CourseID = $2 AND StudentID = $3',
+        [AttendanceID,CourseID,StudentID]
+    );
+
+    if(checkAttendance.rowCount == 0){
+        return res.status(404).json({message:"Invalid Attendance!"});
+    }
+
+    try{
+        await pool.query('UPDATE ATTENDANCE SET AttendanceStatus = $1 WHERE AttendanceID = $2',
+            [AttendanceStatus,AttendanceID]
+        );
+        
+        return res.status(200).json({message:"Updated Attendance!"});
+    }catch (error){
+        throw error;
+    }
+}
+
+module.exports = {getMyCourses,markAttendance,getAllAttendance,updateAttendance};
