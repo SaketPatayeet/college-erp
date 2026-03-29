@@ -17,7 +17,7 @@ const studentLogin = async (req,res)=> {
 
             if(data){
                 const token = jwt.sign(
-                    {id:result.rows[0].StudentID, role:"student"},
+                    {id:result.rows[0].studentid, role:"student"},
                     process.env.JWT_SECRET,
                     {expiresIn:"1d"}
                 );
@@ -45,7 +45,7 @@ const professorLogin = async (req,res)=>{
 
             if(data){
                 const token = jwt.sign(
-                    {id:result.rows[0].ProfessorID, role:"professor"},
+                    {id:result.rows[0].professorid, role:"professor"},
                     process.env.JWT_SECRET,
                     {expiresIn:"1d"}
                 );
