@@ -101,4 +101,49 @@ const updateAttendance = async (req,res)=>{
     }
 }
 
-module.exports = {getMyCourses,markAttendance,getAllAttendance,updateAttendance};
+const createAssignment = async (req,res)=>{
+    const ProfessorID = req.user.id;
+    const {CourseID,Title,Description,dueDate} = req.body;
+
+    const checkAssignment = await pool.query('SELECT * FROM COURSEASSIGNMENT WHERE CourseID = $1 AND ProfessorID=$2',
+        [CourseID,ProfessorID]
+    );
+
+    if(checkAssignment.rowCount == 0){
+        return res.status(404).json({message:"Professor not assigned!"});
+    }
+
+    try{
+
+        const now = new Date();
+        const date = now.toISOString().split('T')[0];
+        await pool.query('INSERT INTO ASSIGNMENT (CourseID,ProfessorID,Title,AssignmentDescription,Duedate,UploadedAt) VALUES ($1,$2,$3,$4,$5,$6)',
+            [CourseID,ProfessorID,Title,Description,dueDate,date]
+        );
+
+        return res.status(201).json({message:"Created Assignment!"});
+    }catch (error){
+        throw error;
+    }
+}
+
+const viewAssignments = async (req,res)=>{
+    const ProfessorID = req.user.id;
+    const CourseID = req.params.CourseID;
+
+    const checkAssignment = await pool.query('SELECT * FROM COURSEASSIGNMENT WHERE CourseID = $1 AND ProfessorID = $2',
+        [CourseID,ProfessorID]
+    );
+
+    if(checkAssignment.rowCount == 0){
+        return res.status(404).json({message:"Invalid CourseID!"});
+    }else{
+        const getAssignments = await pool.query('SELECT * FROM ASSIGNMENT WHERE CourseID = $1 AND ProfessorID = $2',
+            [CourseID,ProfessorID]
+        );
+
+        return res.status(200).json({message:getAssignments.rows});
+    }
+}
+
+module.exports = {getMyCourses,markAttendance,getAllAttendance,updateAttendance,createAssignment,viewAssignments};
