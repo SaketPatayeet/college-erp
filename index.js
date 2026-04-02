@@ -11,9 +11,9 @@ const port = 3000;
 app.use(express.json());
 app.use(cors());
 app.use(authRoutes);
-//app.use(studentRoutes);
 app.use(adminRoutes);
 app.use(professorRoutes);
+app.use(studentRoutes);
 
 app.listen(port,()=>{
     console.log(`Connected to ${port}`);
