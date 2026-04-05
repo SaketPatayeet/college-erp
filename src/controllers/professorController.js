@@ -221,7 +221,7 @@ const uploadGrades = async (req,res)=>{
 
         return res.status(201).json({message:"Updated Grades!"});
     }catch (error){
-        throw error;
+        throw error; 
     }
 }
 
@@ -252,4 +252,23 @@ const getGrades = async (req,res)=>{
     return res.status(200).json({message:grades.rows});
 }
 
-module.exports = {getMyCourses,markAttendance,getAllAttendance,updateAttendance,createAssignment,viewAssignments,uploadResources,viewResources,uploadGrades,getGrades};
+const viewSubmissions = async (req,res)=>{
+    const ProfessorID = req.user.id;
+    const AssignmentID = req.params.AssignmentID;
+
+    const validAssignment = await pool.query('SELECT * FROM ASSIGNMENT WHERE AssignmentID = $1 AND ProfessorID = $2',
+        [AssignmentID,ProfessorID]
+    );
+
+    if(validAssignment.rowCount == 0){
+        return res.status(404).json({message:"Invalid Assignment!"});
+    }
+
+    const submissions = await pool.query('SELECT s.*,st.firstName,st.lastName FROM SUBMISSION as s INNER JOIN STUDENT AS st ON s.StudentID = st.StudentID WHERE AssignmentID = $1',
+        [AssignmentID]
+    );
+
+    return res.status(200).json({message:submissions.rows});
+}
+
+module.exports = {getMyCourses,markAttendance,getAllAttendance,updateAttendance,createAssignment,viewAssignments,uploadResources,viewResources,uploadGrades,getGrades,viewSubmissions};

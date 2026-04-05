@@ -1,6 +1,6 @@
 const express = require('express');
 const {auth,roleCheck} = require('../middleware/authMiddleware');
-const {getMyCourses,markAttendance,getAllAttendance,updateAttendance,createAssignment,viewAssignments,uploadResources,viewResources,uploadGrades,getGrades} = require('../controllers/professorController');
+const {getMyCourses,markAttendance,getAllAttendance,updateAttendance,createAssignment,viewAssignments,uploadResources,viewResources,uploadGrades,getGrades,viewSubmissions} = require('../controllers/professorController');
 
 const router = express.Router();
 
@@ -14,5 +14,6 @@ router.post('/professor/uploadResources/:CourseID',auth,roleCheck('professor'),u
 router.get('/professor/viewResources/:CourseID',auth,roleCheck('professor'),viewResources);
 router.put('/professor/uploadGrades',auth,roleCheck('professor'),uploadGrades);
 router.get('/professor/getGrades/:CourseID/:StudentID',auth,roleCheck('professor'),getGrades);
+router.get('/professor/viewSubmissions/:AssignmentID',auth,roleCheck('professor'),viewSubmissions);
 
 module.exports = router;
