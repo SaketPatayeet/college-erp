@@ -116,6 +116,7 @@ CREATE TABLE FEES(
     AmountDue int NOT NULL,
     Semester varchar(100) NOT NULL,
     PaymentTime TIME NOT NULL,
+    PaymentDate DATE NOT NULL,
     FeeStatus varchar(100) NOT NULL,
     FOREIGN KEY (StudentID) REFERENCES STUDENT(StudentID) ON DELETE CASCADE
 );

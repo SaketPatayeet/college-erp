@@ -1,5 +1,7 @@
 const pool = require('../db');
 
+const SEMESTER_FEES = 50000;
+
 const checkEnrollment = async (StudentID,CourseID)=>{
     const result = await pool.query('SELECT * FROM ENROLLMENT WHERE StudentID = $1 AND CourseID = $2',
         [StudentID,CourseID]
@@ -162,4 +164,59 @@ const viewSubmissions = async (req,res)=>{
     return res.status(200).json({message:submissions.rows});
 }
 
-module.exports = {enroll,getEnrollment,getAttendance,getResources,getAllAssignments,getGrades,submitAssignments,viewSubmissions};
+const payFees = async (req, res) => {
+    const StudentID = req.user.id;
+    const { AmountPaid, Semester } = req.body;
+
+    try {
+        const checkStatus = await pool.query(
+            'SELECT * FROM FEES WHERE StudentID = $1 AND Semester = $2',
+            [StudentID, Semester]
+        );
+
+        const now = new Date();
+        const date = now.toISOString().split('T')[0];
+        const time = now.toTimeString().split(' ')[0];
+
+        if (checkStatus.rowCount > 0) {
+            const prev = checkStatus.rows[0];
+
+            if (prev.feestatus === 'PAID') {
+                return res.status(409).json({ message: "Already Paid!" });
+            }
+
+            // 🔹 UPDATE case (partial payment)
+            const newAmountPaid = prev.amountpaid + AmountPaid;
+            const AmountDue = SEMESTER_FEES - newAmountPaid;
+            const FeeStatus = AmountDue > 0 ? 'UNPAID' : 'PAID';
+
+            await pool.query(
+                `UPDATE FEES 
+                 SET AmountPaid=$1, AmountDue=$2, FeeStatus=$3, PaymentTime=$4, PaymentDate=$5
+                 WHERE StudentID=$6 AND Semester=$7`,
+                [newAmountPaid, AmountDue, FeeStatus, time, date, StudentID, Semester]
+            );
+
+            return res.status(200).json({ message: "Payment updated!" });
+        }
+
+        // 🔹 FIRST PAYMENT (INSERT)
+        const AmountDue = SEMESTER_FEES - AmountPaid;
+        const FeeStatus = AmountDue > 0 ? 'UNPAID' : 'PAID';
+
+        await pool.query(
+            `INSERT INTO FEES 
+            (StudentID, AmountPaid, AmountDue, Semester, PaymentTime, PaymentDate, FeeStatus) 
+            VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+            [StudentID, AmountPaid, AmountDue, Semester, time, date, FeeStatus]
+        );
+
+        return res.status(201).json({ message: 'Payment recorded!' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+module.exports = {enroll,getEnrollment,getAttendance,getResources,getAllAssignments,getGrades,submitAssignments,viewSubmissions,payFees};
