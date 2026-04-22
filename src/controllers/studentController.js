@@ -219,4 +219,22 @@ const payFees = async (req, res) => {
     }
 };
 
-module.exports = {enroll,getEnrollment,getAttendance,getResources,getAllAssignments,getGrades,submitAssignments,viewSubmissions,payFees};
+const viewPayment = async (req,res)=>{
+    const StudentID = req.user.id;
+    
+    try{
+        const result = await pool.query('SELECT * FROM FEES WHERE StudentID=$1',
+            [StudentID]
+        );
+
+        if(result.rowCount == 0){
+            return res.status(404).json({message:"No Payments!"});
+        }
+
+        return res.status(200).json({message:result.rows});
+    }catch (error){
+        throw error;
+    }
+}
+
+module.exports = {enroll,getEnrollment,getAttendance,getResources,getAllAssignments,getGrades,submitAssignments,viewSubmissions,payFees,viewPayment};

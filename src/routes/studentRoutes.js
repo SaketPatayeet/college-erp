@@ -1,6 +1,6 @@
     const express = require('express');
     const {auth,roleCheck} = require('../middleware/authMiddleware');
-    const {enroll,getEnrollment,getAttendance,getResources, getAllAssignments, getGrades, submitAssignments, viewSubmissions, payFees} = require('../controllers/studentController');
+    const {enroll,getEnrollment,getAttendance,getResources, getAllAssignments, getGrades, submitAssignments, viewSubmissions, payFees,viewPayment} = require('../controllers/studentController');
 
     const router = express.Router();
 
@@ -13,4 +13,5 @@
     router.post('/student/submitAssignments',auth,roleCheck('student'),submitAssignments);
     router.get('/student/viewSubmissions/:AssignmentID',auth,roleCheck('student'),viewSubmissions);
     router.post('/student/payFees',auth,roleCheck('student'),payFees);
+    router.get('/student/viewPayments',auth,roleCheck('student'),viewPayment);
     module.exports = router;
