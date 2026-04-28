@@ -202,6 +202,9 @@ const payFees = async (req, res) => {
 
         // 🔹 FIRST PAYMENT (INSERT)
         const AmountDue = SEMESTER_FEES - AmountPaid;
+        if(AmountPaid > AmountDue) {
+            return res.status(400).json({message: "Amount exceeds due amount!"});
+        }
         const FeeStatus = AmountDue > 0 ? 'UNPAID' : 'PAID';
 
         await pool.query(

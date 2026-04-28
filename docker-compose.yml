@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  node-api:
+    image: node-api
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    ports: 
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=9623069444
+      - DB=college_erp
+      - DB_PORT=5432
+      - JWT_SECRET=college_erp_12311256_saket_2026
+    depends_on:
+      - db
+    networks:
+      - backend
+    restart: unless-stopped
+
+  db:
+    image: postgres:15.1-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=9623069444
+      - POSTGRES_DB=college_erp
+    networks:
+      - backend
+    ports:
+      - "5432:5432"
+  
+volumes:
+  pgdata:
+  
+networks:
+  backend:
